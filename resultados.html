@@ -62,8 +62,13 @@
   .item-row .txt{ color:var(--ink-soft); }
   .item-row .num{ font-variant-numeric:tabular-nums; font-weight:700; }
 
-  .footer{ text-align:center; font-size:11.5px; color:var(--ink-soft); margin-top:36px; }
+  .footer{ text-align:center; font-size:11.5px; color:var(--ink-soft); margin-top:36px; display:flex; flex-direction:column; align-items:center; gap:14px; }
   a.back{ color:var(--accent-strong); font-weight:600; text-decoration:none; }
+  .clear-btn{
+    background:none; border:1px solid var(--line); color:var(--ink-soft); border-radius:8px;
+    padding:7px 14px; font-size:11.5px; font-weight:600; cursor:pointer; font-family:inherit;
+  }
+  .clear-btn:hover{ border-color:var(--danger); color:var(--danger); }
 </style>
 </head>
 <body>
@@ -85,7 +90,10 @@
   </div>
   <div id="dashboard"></div>
 
-  <div class="footer"><a class="back" href="index.html">← Voltar à pesquisa</a></div>
+  <div class="footer">
+    <a class="back" href="index.html">← Voltar à pesquisa</a>
+    <button type="button" class="clear-btn" id="clear-btn" onclick="clearResults()">Limpar resultados</button>
+  </div>
 </div>
 
 <script>
@@ -195,6 +203,36 @@
     });
 
     document.getElementById('dashboard').innerHTML = html;
+  }
+
+  async function clearResults(){
+    if (!confirm('Isso vai apagar TODAS as respostas coletadas até agora. Essa ação não pode ser desfeita. Continuar?')) return;
+
+    const password = prompt('Digite a senha para confirmar a limpeza:');
+    if (password === null) return;
+
+    const btn = document.getElementById('clear-btn');
+    btn.disabled = true;
+    btn.textContent = 'Limpando...';
+
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'clear', password: password })
+      });
+      const data = await res.json();
+      if (data.status === 'ok') {
+        loadResults();
+      } else {
+        alert(data.message || 'Não foi possível limpar os resultados.');
+      }
+    } catch (err) {
+      alert('Erro ao limpar. Verifique sua conexão e tente novamente.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Limpar resultados';
+    }
   }
 
   loadResults();

@@ -5,6 +5,9 @@
 
 const SHEET_NAME = 'Respostas';
 const TOTAL_QUESTIONS = 9;
+// Senha simples para liberar o botão "Limpar resultados" no painel.
+// Troque por algo só seu antes de reimplantar.
+const CLEAR_PASSWORD = 'biogenesis2026';
 
 function getSheet_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -19,8 +22,21 @@ function getSheet_() {
 }
 
 function doPost(e) {
-  const sheet = getSheet_();
   const data = JSON.parse(e.postData.contents);
+
+  if (data.action === 'clear') {
+    if (data.password !== CLEAR_PASSWORD) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'error', message: 'Senha incorreta.' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    clearResponses_();
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'ok' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const sheet = getSheet_();
   const row = [new Date()];
   for (let i = 1; i <= TOTAL_QUESTIONS; i++) {
     row.push(Number(data['q' + i]));
@@ -29,6 +45,14 @@ function doPost(e) {
   return ContentService
     .createTextOutput(JSON.stringify({ status: 'ok' }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function clearResponses_() {
+  const sheet = getSheet_();
+  const lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.deleteRows(2, lastRow - 1);
+  }
 }
 
 function doGet(e) {
