@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulso do Engajamento — Academia de Liderança Biogénesis Bagó</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --ink:#1c2b26; --ink-soft:#4a5c55; --paper:#f6f4ee; --paper-raised:#ffffff;
+    --line:#dcd6c8; --accent:#0f6e5c; --accent-soft:#e2efe9; --accent-strong:#0a4f42; --gold:#b8873a;
+    --shadow: 0 1px 2px rgba(28,43,38,.06), 0 8px 24px -12px rgba(28,43,38,.18);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    padding:28px 16px 64px; line-height:1.5;
+  }
+  .container{ max-width:640px; margin:0 auto; }
+  h1,h2{ font-family:'Fraunces', Georgia, serif; font-weight:600; margin:0; }
+  .eyebrow{
+    font-size:11.5px; letter-spacing:.11em; text-transform:uppercase; color:var(--accent-strong);
+    font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px; justify-content:center;
+  }
+  .eyebrow::before{content:""; width:16px; height:2px; background:var(--gold); display:inline-block;}
+  header{ text-align:center; margin-bottom:28px; }
+  header h1{ font-size:26px; margin-bottom:8px; }
+  header p{ color:var(--ink-soft); font-size:14.5px; max-width:48ch; margin:0 auto; }
+
+  .scale-legend{
+    display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:12px;
+    padding:12px 16px; margin-bottom:22px; font-size:12.5px; color:var(--ink-soft); box-shadow:var(--shadow);
+  }
+  .dim-heading{ font-family:'Fraunces',serif; font-size:15px; font-weight:600; color:var(--accent-strong);
+    margin:26px 0 10px; padding-top:6px; }
+  .dim-heading:first-of-type{ margin-top:0; }
+
+  .q-card{
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:14px;
+    padding:18px 20px; margin-bottom:12px; box-shadow:var(--shadow); transition:border-color .15s;
+  }
+  .q-card.answered{ border-color:var(--accent); }
+  .q-card.error{ border-color:#a8432f; }
+  .q-num{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--accent-strong); margin-bottom:6px; }
+  .q-text{ font-size:15px; font-weight:500; margin-bottom:16px; }
+  .opts{ display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+  .opt-label{ cursor:pointer; }
+  .opt-label input{ display:none; }
+  .opt-btn{
+    display:flex; flex-direction:column; align-items:center; gap:5px; padding:9px 3px;
+    border-radius:10px; border:1px solid var(--line); background:var(--paper); transition:all .15s;
+  }
+  .opt-num{ font-size:15px; font-weight:700; color:var(--ink-soft); }
+  .opt-label input:checked + .opt-btn{ border-color:var(--accent); background:var(--accent-soft); }
+  .opt-label input:checked + .opt-btn .opt-num{ color:var(--accent-strong); }
+  .opt-label:hover .opt-btn{ border-color:var(--accent); }
+  .scale-labels{ display:flex; justify-content:space-between; font-size:10.5px; color:var(--ink-soft); margin-top:8px; }
+  .error-msg{ display:none; color:#a8432f; font-size:12.5px; margin-top:8px; font-weight:600; }
+  .q-card.error .error-msg{ display:block; }
+
+  .submit-btn{
+    display:block; width:100%; padding:15px; background:var(--accent); color:#fff; border:none;
+    border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; margin-top:24px;
+    font-family:inherit; box-shadow:var(--shadow);
+  }
+  .submit-btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+  #success-screen{ display:none; text-align:center; padding:56px 20px; }
+  #success-screen .mark{ font-size:40px; margin-bottom:14px; }
+  #success-screen h2{ font-size:22px; margin-bottom:8px; }
+  #success-screen p{ color:var(--ink-soft); font-size:14.5px; }
+  .results-link{
+    display:inline-block; margin-top:22px; padding:12px 24px; background:var(--accent); color:#fff;
+    text-decoration:none; border-radius:10px; font-weight:700; font-size:14px;
+  }
+
+  .footer{ text-align:center; font-size:11.5px; color:var(--ink-soft); margin-top:36px; }
+
+  @media (max-width:480px){
+    .opt-num{ font-size:13px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="eyebrow">Academia de Liderança · Biogénesis Bagó</div>
+    <h1>Pulso do Engajamento</h1>
+    <p>Como estamos hoje? Pensando nas últimas semanas, avalie o quanto você concorda com cada afirmação.</p>
+  </header>
+
+  <div class="scale-legend">
+    <span>1 · Discordo totalmente</span>
+    <span>3 · Nem concordo nem discordo</span>
+    <span>5 · Concordo totalmente</span>
+  </div>
+
+  <form id="survey-form">
+    <div id="questions-root"></div>
+    <button type="submit" class="submit-btn" id="submit-btn">Enviar respostas →</button>
+  </form>
+</div>
+
+<div id="success-screen">
+  <div class="container">
+    <div class="mark">✓</div>
+    <h2>Resposta registrada!</h2>
+    <p>Obrigado por participar. Sua resposta foi salva anonimamente e já está sendo considerada no diagnóstico do grupo.</p>
+    <a href="resultados.html" class="results-link">Ver resultado do grupo →</a>
+  </div>
+</div>
+
+<div class="footer">Academia de Liderança — Biogénesis Bagó · Escala baseada em Vigor, Dedicação e Absorção</div>
+
+<script>
+  // Cole aqui a URL do Google Apps Script (Web App) após publicar o deployment.
+  const SCRIPT_URL = 'COLE_AQUI_A_URL_DO_APPS_SCRIPT';
+
+  const DIMENSIONS = [
+    { key:'vigor', label:'Vigor', items:[
+      'Tenho energia e disposição para realizar meu trabalho no dia a dia.',
+      'Mesmo diante de dificuldades, consigo mobilizar energia para seguir em frente.',
+      'Sinto que consigo investir esforço e presença no trabalho sem funcionar apenas “no automático”.'
+    ]},
+    { key:'dedicacao', label:'Dedicação', items:[
+      'Percebo sentido e importância no trabalho que realizo.',
+      'Sinto orgulho da contribuição que entrego por meio do meu trabalho.',
+      'Os desafios do meu trabalho despertam em mim vontade de contribuir e fazer acontecer.'
+    ]},
+    { key:'absorcao', label:'Absorção', items:[
+      'Consigo me concentrar verdadeiramente nas atividades que realizo.',
+      'Há momentos em que me envolvo profundamente com o que estou fazendo.',
+      'Consigo manter minha atenção no trabalho mesmo diante das inúmeras distrações e demandas do dia a dia.'
+    ]}
+  ];
+
+  const root = document.getElementById('questions-root');
+  let qn = 0;
+  DIMENSIONS.forEach(dim => {
+    const h = document.createElement('div');
+    h.className = 'dim-heading';
+    h.textContent = dim.label;
+    root.appendChild(h);
+    dim.items.forEach(text => {
+      qn++;
+      const card = document.createElement('div');
+      card.className = 'q-card';
+      card.id = 'card-' + qn;
+      let opts = '';
+      for (let v = 1; v <= 5; v++) {
+        opts += `
+          <label class="opt-label">
+            <input type="radio" name="q${qn}" value="${v}">
+            <div class="opt-btn"><span class="opt-num">${v}</span></div>
+          </label>`;
+      }
+      card.innerHTML = `
+        <div class="q-num">Afirmação ${qn} de 9</div>
+        <div class="q-text">${text}</div>
+        <div class="opts">${opts}</div>
+        <div class="scale-labels"><span>Discordo totalmente</span><span>Concordo totalmente</span></div>
+        <div class="error-msg">Por favor, selecione uma opção.</div>`;
+      root.appendChild(card);
+      card.querySelectorAll('input').forEach(inp => {
+        inp.addEventListener('change', () => {
+          card.classList.add('answered');
+          card.classList.remove('error');
+        });
+      });
+    });
+  });
+  const TOTAL_Q = qn;
+
+  document.getElementById('survey-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const payload = {};
+    let firstError = null;
+
+    for (let q = 1; q <= TOTAL_Q; q++) {
+      const sel = document.querySelector(`input[name="q${q}"]:checked`);
+      const card = document.getElementById('card-' + q);
+      if (!sel) {
+        card.classList.add('error');
+        if (!firstError) firstError = card;
+      } else {
+        payload['q' + q] = parseInt(sel.value, 10);
+      }
+    }
+
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      document.querySelector('.container').style.display = 'none';
+      document.getElementById('success-screen').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Enviar respostas →';
+      alert('Erro ao enviar. Verifique sua conexão e tente novamente.');
+    }
+  });
+</script>
+</body>
+</html>

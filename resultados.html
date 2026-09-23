@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resultados — Pulso do Engajamento Biogénesis</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --ink:#1c2b26; --ink-soft:#4a5c55; --paper:#f6f4ee; --paper-raised:#ffffff;
+    --line:#dcd6c8; --accent:#0f6e5c; --accent-soft:#e2efe9; --accent-strong:#0a4f42; --gold:#b8873a;
+    --great:#245c8a; --great-soft:#e2ecf4; --warn:#b8873a; --warn-soft:#f2e9d8;
+    --danger:#a8432f; --danger-soft:#f3e3de; --ok:#0f6e5c; --ok-soft:#e2efe9;
+    --shadow: 0 1px 2px rgba(28,43,38,.06), 0 8px 24px -12px rgba(28,43,38,.18);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    padding:28px 16px 64px; line-height:1.5;
+  }
+  .container{ max-width:720px; margin:0 auto; }
+  h1,h2{ font-family:'Fraunces', Georgia, serif; font-weight:600; margin:0; }
+  .eyebrow{
+    font-size:11.5px; letter-spacing:.11em; text-transform:uppercase; color:var(--accent-strong);
+    font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px; justify-content:center;
+  }
+  .eyebrow::before{content:""; width:16px; height:2px; background:var(--gold); display:inline-block;}
+  header{ text-align:center; margin-bottom:28px; }
+  header h1{ font-size:26px; margin-bottom:8px; }
+  header p{ color:var(--ink-soft); font-size:14.5px; max-width:48ch; margin:0 auto; }
+
+  #loading, #no-data, #error-screen{ text-align:center; padding:60px 20px; color:var(--ink-soft); }
+  #loading .mark, #no-data .mark, #error-screen .mark{ font-size:34px; margin-bottom:10px; }
+
+  .kpi-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:20px; }
+  .kpi{ background:var(--paper-raised); border:1px solid var(--line); border-radius:14px; padding:16px 18px; box-shadow:var(--shadow); }
+  .kpi .lbl{ font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:700; margin-bottom:8px; }
+  .kpi .val{ font-family:'Fraunces',serif; font-size:30px; font-variant-numeric:tabular-nums; line-height:1; }
+  .kpi .sub{ font-size:12px; color:var(--ink-soft); margin-top:6px; }
+  .pill{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700; margin-top:8px; }
+  .pill.great{ background:var(--ok-soft); color:var(--ok); }
+  .pill.good{ background:var(--great-soft); color:var(--great); }
+  .pill.warn{ background:var(--warn-soft); color:var(--warn); }
+  .pill.bad{ background:var(--danger-soft); color:var(--danger); }
+
+  .band-key{ display:flex; flex-wrap:wrap; gap:10px 18px; font-size:12px; color:var(--ink-soft); margin:18px 0 24px; padding:14px 16px; background:var(--paper-raised); border:1px solid var(--line); border-radius:12px; }
+  .band-key .k{ display:flex; align-items:center; gap:7px; }
+  .band-key .dot{ width:9px; height:9px; border-radius:50%; flex:none; }
+
+  .card{ background:var(--paper-raised); border:1px solid var(--line); border-radius:14px; padding:22px 24px; box-shadow:var(--shadow); margin-bottom:16px; }
+  .block-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+  .block-head h2{ font-size:18px; }
+
+  .bar-wrap{ display:flex; align-items:center; gap:14px; margin-bottom:8px; }
+  .bar-track{ flex:1; height:10px; border-radius:999px; background:var(--paper); border:1px solid var(--line); position:relative; overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:999px; width:0%; transition:width .8s ease; }
+  .bar-num{ font-variant-numeric:tabular-nums; font-weight:700; font-size:14px; width:38px; text-align:right; }
+
+  .item-row{ display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding-block:9px; border-top:1px solid var(--line); font-size:13px; }
+  .item-row:first-of-type{ border-top:none; }
+  .item-row .txt{ color:var(--ink-soft); }
+  .item-row .num{ font-variant-numeric:tabular-nums; font-weight:700; }
+
+  .footer{ text-align:center; font-size:11.5px; color:var(--ink-soft); margin-top:36px; }
+  a.back{ color:var(--accent-strong); font-weight:600; text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="eyebrow">Academia de Liderança · Biogénesis Bagó</div>
+    <h1>Resultado do Grupo</h1>
+    <p>Diagnóstico coletivo de Vigor, Dedicação e Absorção com base nas respostas recebidas.</p>
+  </header>
+
+  <div id="loading"><div class="mark">…</div><p>Carregando resultados…</p></div>
+  <div id="no-data" style="display:none;">
+    <div class="mark">◔</div>
+    <p>Ainda não há respostas suficientes. Assim que o grupo responder à pesquisa, os resultados aparecem aqui.</p>
+  </div>
+  <div id="error-screen" style="display:none;">
+    <div class="mark">⚠</div>
+    <p>Não foi possível carregar os resultados agora. Tente novamente em instantes.</p>
+  </div>
+  <div id="dashboard"></div>
+
+  <div class="footer"><a class="back" href="index.html">← Voltar à pesquisa</a></div>
+</div>
+
+<script>
+  // Cole aqui a mesma URL do Google Apps Script usada em index.html
+  const SCRIPT_URL = 'COLE_AQUI_A_URL_DO_APPS_SCRIPT';
+
+  const DIMENSIONS = [
+    { key:'vigor', label:'Vigor', color:'#0f6e5c', items:[
+      'Tenho energia e disposição para realizar meu trabalho no dia a dia.',
+      'Mesmo diante de dificuldades, consigo mobilizar energia para seguir em frente.',
+      'Sinto que consigo investir esforço e presença no trabalho sem funcionar apenas “no automático”.'
+    ]},
+    { key:'dedicacao', label:'Dedicação', color:'#245c8a', items:[
+      'Percebo sentido e importância no trabalho que realizo.',
+      'Sinto orgulho da contribuição que entrego por meio do meu trabalho.',
+      'Os desafios do meu trabalho despertam em mim vontade de contribuir e fazer acontecer.'
+    ]},
+    { key:'absorcao', label:'Absorção', color:'#b8873a', items:[
+      'Consigo me concentrar verdadeiramente nas atividades que realizo.',
+      'Há momentos em que me envolvo profundamente com o que estou fazendo.',
+      'Consigo manter minha atenção no trabalho mesmo diante das inúmeras distrações e demandas do dia a dia.'
+    ]}
+  ];
+
+  function bandFor(avg){
+    if (avg == null) return { label:'—', cls:'', color:'var(--ink-soft)' };
+    if (avg >= 4.20) return { label:'Condição bastante presente', cls:'great', color:'var(--ok)' };
+    if (avg >= 3.60) return { label:'Presente, com oportunidades', cls:'good', color:'var(--great)' };
+    if (avg >= 3.00) return { label:'Ponto que merece atenção', cls:'warn', color:'var(--warn)' };
+    return { label:'Ponto que merece investigação', cls:'bad', color:'var(--danger)' };
+  }
+
+  async function loadResults(){
+    try {
+      const res = await fetch(SCRIPT_URL + '?action=results');
+      const data = await res.json();
+      document.getElementById('loading').style.display = 'none';
+
+      if (!data || !data.count) {
+        document.getElementById('no-data').style.display = 'block';
+        return;
+      }
+      renderDashboard(data);
+    } catch (err) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error-screen').style.display = 'block';
+    }
+  }
+
+  function renderDashboard(data){
+    const dimAvgs = data.dimensionAvgs || {};
+    const qAvgs = data.questionAvgs || [];
+    const overallAvg = data.overallAvg;
+    const overallBand = bandFor(overallAvg);
+
+    let html = '<div class="kpi-row">';
+    html += `<div class="kpi">
+      <div class="lbl">Situação geral</div>
+      <div class="val" style="color:${overallBand.color}">${overallAvg!=null ? overallAvg.toFixed(2) : '—'}</div>
+      <span class="pill ${overallBand.cls}">${overallBand.label}</span>
+    </div>`;
+    DIMENSIONS.forEach(dim => {
+      const avg = dimAvgs[dim.key];
+      const band = bandFor(avg);
+      html += `<div class="kpi">
+        <div class="lbl">${dim.label}</div>
+        <div class="val" style="color:${band.color}">${avg!=null ? avg.toFixed(2) : '—'}</div>
+        <span class="pill ${band.cls}">${band.label}</span>
+      </div>`;
+    });
+    html += `<div class="kpi">
+      <div class="lbl">Respostas coletadas</div>
+      <div class="val">${data.count}</div>
+      <div class="sub">participante${data.count===1?'':'s'}</div>
+    </div>`;
+    html += '</div>';
+
+    html += `<div class="band-key">
+      <span class="k"><span class="dot" style="background:var(--ok)"></span>4,20–5,00 · bastante presente</span>
+      <span class="k"><span class="dot" style="background:var(--great)"></span>3,60–4,19 · presente, com oportunidades</span>
+      <span class="k"><span class="dot" style="background:var(--warn)"></span>3,00–3,59 · merece atenção</span>
+      <span class="k"><span class="dot" style="background:var(--danger)"></span>abaixo de 3,00 · merece investigação</span>
+    </div>`;
+
+    let qi = 0;
+    DIMENSIONS.forEach(dim => {
+      const avg = dimAvgs[dim.key];
+      const band = bandFor(avg);
+      html += `<div class="card">
+        <div class="block-head">
+          <h2>${dim.label}</h2>
+          <span class="pill ${band.cls}">${avg!=null ? avg.toFixed(2) : '—'} · ${band.label}</span>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-track"><div class="bar-fill" style="width:${avg!=null ? (avg/5*100) : 0}%; background:${dim.color}"></div></div>
+          <div class="bar-num">${avg!=null ? avg.toFixed(2) : '—'}</div>
+        </div>`;
+      dim.items.forEach((text, i) => {
+        const v = qAvgs[qi];
+        html += `<div class="item-row">
+          <span class="txt">${i+1}. ${text}</span>
+          <span class="num">${v!=null ? v.toFixed(2) : '—'}</span>
+        </div>`;
+        qi++;
+      });
+      html += '</div>';
+    });
+
+    document.getElementById('dashboard').innerHTML = html;
+  }
+
+  loadResults();
+</script>
+</body>
+</html>
